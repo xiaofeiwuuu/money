@@ -136,8 +136,8 @@ class BaseParser(ABC):
         # 构建列映射
         mapping = self.build_column_mapping(list(df.columns))
 
-        # 检查必需列
-        required = ["transaction_time", "amount", "order_id"]
+        # 检查必需列（账单没这些列就无法解析）
+        required = ["transaction_time", "amount", "order_id", "direction"]
         for field in required:
             col = getattr(mapping, field)
             if not col or col not in df.columns:
@@ -148,16 +148,16 @@ class BaseParser(ABC):
         # 预计算列名到 tuple 索引的映射（+1 因为 index 在位置 0）
         col_idx = {col: i + 1 for i, col in enumerate(df.columns)}
 
-        # 预计算必需字段的索引
+        # 必需字段索引（上面 required 检查过，保证在 col_idx 里）
         time_idx = col_idx[mapping.transaction_time]
         amount_idx = col_idx[mapping.amount]
         direction_idx = col_idx[mapping.direction]
         order_idx = col_idx[mapping.order_id]
-        counterparty_idx = col_idx[mapping.counterparty]
-        desc_idx = col_idx[mapping.description]
-        cat_idx = col_idx[mapping.category]
 
-        # 可选字段索引（可能不存在）
+        # 可选字段索引（.get() 兜底，缺失时为 None，不会 KeyError）
+        counterparty_idx = col_idx.get(mapping.counterparty) if mapping.counterparty else None
+        desc_idx = col_idx.get(mapping.description) if mapping.description else None
+        cat_idx = col_idx.get(mapping.category) if mapping.category else None
         payment_idx = col_idx.get(mapping.payment_method) if mapping.payment_method else None
         status_idx = col_idx.get(mapping.status) if mapping.status else None
         merchant_idx = col_idx.get(mapping.merchant_order_id) if mapping.merchant_order_id else None
@@ -174,9 +174,9 @@ class BaseParser(ABC):
                     transaction_time=self.parse_datetime(row[time_idx]),
                     amount=self.parse_amount(row[amount_idx]),
                     direction=self.parse_direction(self.safe_str(row[direction_idx])),
-                    counterparty=self.safe_str(row[counterparty_idx]),
-                    description=self.safe_str(row[desc_idx]),
-                    source_category=self.safe_str(row[cat_idx]),
+                    counterparty=self.safe_str(row[counterparty_idx]) if counterparty_idx else "",
+                    description=self.safe_str(row[desc_idx]) if desc_idx else "",
+                    source_category=self.safe_str(row[cat_idx]) if cat_idx else "",
                     payment_method=self.safe_str(row[payment_idx]) if payment_idx else "",
                     status=self.safe_str(row[status_idx]) if status_idx else "",
                     merchant_order_id=self.safe_str(row[merchant_idx]) or None

@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 from sqlalchemy import case, func, select
@@ -11,6 +11,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.models import TransactionRecord, UploadLog
 from ..schemas.transaction import Transaction
+
+# 北京时区（账单和用户交互均以北京时间为准）
+_CN_TZ = timezone(timedelta(hours=8))
+
+
+def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
+    """naive datetime 视为北京时间，aware 的保持不变。
+
+    防止 FastAPI query 参数传来的 naive datetime 和 TIMESTAMPTZ 列比较时，
+    asyncpg 把 naive 当 UTC 解读导致 8 小时偏差。
+    """
+    if dt is not None and dt.tzinfo is None:
+        return dt.replace(tzinfo=_CN_TZ)
+    return dt
 
 
 async def save_transactions(
@@ -117,6 +131,8 @@ async def save_transactions(
 
 def _apply_transaction_filters(query, user_id, start_date, end_date, direction):
     """应用交易过滤条件"""
+    start_date = _ensure_aware(start_date)
+    end_date = _ensure_aware(end_date)
     query = query.where(TransactionRecord.user_id == user_id)
     if start_date:
         query = query.where(TransactionRecord.transaction_time >= start_date)
@@ -179,7 +195,9 @@ async def get_transaction_stats(
         func.count(TransactionRecord.id).label("count"),
     ).where(TransactionRecord.user_id == user_id)
 
-    # 日期过滤（与 list 保持一致）
+    # 日期过滤（与 list 保持一致，naive datetime 补北京时区）
+    start_date = _ensure_aware(start_date)
+    end_date = _ensure_aware(end_date)
     if start_date:
         query = query.where(TransactionRecord.transaction_time >= start_date)
     if end_date:
