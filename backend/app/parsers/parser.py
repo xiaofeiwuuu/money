@@ -23,7 +23,7 @@ def detect_source(file_path: Path) -> str:
     # 1. 通过文件名检测
     if "支付宝" in filename or "alipay" in filename:
         return "alipay"
-    elif "微信" in filename or "wechat" in filename:
+    if "微信" in filename or "wechat" in filename:
         return "wechat"
 
     # 2. 通过文件内容检测
@@ -35,7 +35,7 @@ def detect_source(file_path: Path) -> str:
             if parser_cls.can_parse(columns):
                 if parser_cls == AlipayParser:
                     return "alipay"
-                elif parser_cls == WechatParser:
+                if parser_cls == WechatParser:
                     return "wechat"
     except Exception:
         pass
@@ -44,7 +44,7 @@ def detect_source(file_path: Path) -> str:
     suffix = file_path.suffix.lower()
     if suffix == ".xlsx":
         return "wechat"
-    elif suffix == ".csv":
+    if suffix == ".csv":
         return "alipay"
 
     raise ValueError(f"无法识别文件来源: {file_path.name}")
@@ -72,10 +72,9 @@ def parse_file(file_path: Path, source: Optional[str] = None) -> Tuple[List[Tran
 
     if source == "alipay":
         return parse_alipay(file_path)
-    elif source == "wechat":
+    if source == "wechat":
         return parse_wechat(file_path)
-    else:
-        raise ValueError(f"不支持的来源: {source}")
+    raise ValueError(f"不支持的来源: {source}")
 
 
 def parse_auto(file_path: Path) -> Tuple[List[Transaction], dict, str]:

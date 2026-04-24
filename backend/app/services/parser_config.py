@@ -16,14 +16,14 @@ from ..parsers.config import (
 
 # 重新导出以保持兼容
 __all__ = [
-    "get_default_aliases",
-    "get_cached_aliases",
-    "update_cache",
-    "clear_cache",
-    "load_parser_config",
-    "get_all_configs",
-    "update_config",
     "add_alias",
+    "clear_cache",
+    "get_all_configs",
+    "get_cached_aliases",
+    "get_default_aliases",
+    "load_parser_config",
+    "update_cache",
+    "update_config",
 ]
 
 

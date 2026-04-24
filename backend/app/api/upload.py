@@ -97,7 +97,7 @@ async def upload_file(
 
     except Exception as e:
         logger.exception("解析失败")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     finally:
         tmp_path.unlink(missing_ok=True)
@@ -129,7 +129,7 @@ async def upload_and_save(
         if source is None:
             source = detect_source(Path(filename))
 
-        transactions, stats = parse_file(tmp_path, source=source)
+        transactions, _ = parse_file(tmp_path, source=source)
 
         saved, duplicates, failed = await save_transactions(
             db, current_user.id, transactions, filename
@@ -148,7 +148,7 @@ async def upload_and_save(
 
     except Exception as e:
         logger.exception("导入失败")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     finally:
         tmp_path.unlink(missing_ok=True)
@@ -184,7 +184,7 @@ async def preview_upload(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
     finally:
         tmp_path.unlink(missing_ok=True)

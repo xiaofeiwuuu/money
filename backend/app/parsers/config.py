@@ -39,7 +39,7 @@ def get_default_aliases(source: str) -> Dict[str, List[str]]:
     """获取默认别名配置"""
     if source == "alipay":
         return DEFAULT_ALIPAY_ALIASES.copy()
-    elif source == "wechat":
+    if source == "wechat":
         return DEFAULT_WECHAT_ALIASES.copy()
     return {}
 

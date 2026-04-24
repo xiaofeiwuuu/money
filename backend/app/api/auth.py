@@ -73,7 +73,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         await db.refresh(user)
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="邮箱已被注册")
+        raise HTTPException(status_code=400, detail="邮箱已被注册") from None
 
     # 生成 token
     access_token = create_access_token(data={"sub": str(user.id)})

@@ -53,8 +53,7 @@ async def list_parser_configs(
 
     可选按来源筛选：alipay 或 wechat
     """
-    configs = await get_all_configs(db, source=source)
-    return configs
+    return await get_all_configs(db, source=source)
 
 
 @router.put("/parser-configs")

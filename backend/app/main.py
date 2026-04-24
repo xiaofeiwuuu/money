@@ -34,7 +34,7 @@ cors_origins = settings.get_cors_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=True if cors_origins != ["*"] else False,  # * 时不能用 credentials
+    allow_credentials=cors_origins != ["*"],  # * 时不能用 credentials
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -39,3 +39,11 @@ repos:
         args: [-q, -ll]  # 只报 medium+ 严重度
         files: ^backend/app/.*\.py$
         exclude: ^backend/tests/
+
+  # ---- Python: vulture (死代码检测) ----
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.14
+    hooks:
+      - id: vulture
+        args: [--min-confidence, "80", "backend/app"]
+        pass_filenames: false  # 总是扫 backend/app 全量，不只 staged 文件

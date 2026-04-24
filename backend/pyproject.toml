@@ -15,5 +15,50 @@ line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+select = [
+    "E", "F", "W",  # pycodestyle + pyflakes（基础）
+    "I",            # isort（import 排序）
+    "B",            # bugbear（常见 bug 陷阱）
+    "SIM",          # simplify（代码简化）
+    "C4",           # comprehensions（推导式优化）
+    "RET",          # return 语句优化
+    "RUF",          # ruff 自己的规则
+    "PTH",          # 用 pathlib 代替 os.path
+    "T20",          # 禁止 print（生产代码）
+    "ERA",          # 注释掉的代码
+]
+ignore = [
+    "E501",    # 行长度（formatter 管）
+    "B008",    # FastAPI Depends() 写在参数默认值是惯用法
+    "RUF001",  # 全角/半角标点混用（中文项目误报多）
+    "RUF002",  # 文档字符串里的标点
+    "RUF003",  # 注释里的标点
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20", "ERA"]
+"test_parser.py" = ["T20"]
+"run.py" = ["T20"]
+"alembic/**" = ["ERA"]
+"app/parsers/alipay.py" = ["T20"]  # __main__ 块里有 print
+"app/parsers/wechat.py" = ["T20"]
+
+[tool.vulture]
+min_confidence = 80
+paths = ["app"]
+exclude = ["tests/", "alembic/"]
+ignore_names = [
+    # FastAPI 路由函数名不是外部显式调用，容易被误判
+    "upload_file", "upload_and_save", "preview_upload",
+    "register", "login", "get_me", "update_me",
+    "list_transactions", "get_stats", "update_transaction",
+    "list_parser_configs", "update_parser_config",
+    "add_column_alias", "reload_parser_configs",
+    "root", "health",
+    # Pydantic / SQLAlchemy 的魔法字段
+    "model_config", "Config", "from_attributes",
+    # 解析器基类的 API
+    "parse_alipay_csv", "parse_wechat_xlsx",
+    # Pydantic validator
+    "validate_secret_key",
+]

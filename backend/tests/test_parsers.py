@@ -68,7 +68,7 @@ class TestAlipayParser:
             tmp_path = Path(f.name)
 
         try:
-            transactions, stats = parse_file(tmp_path, source="alipay")
+            transactions, _ = parse_file(tmp_path, source="alipay")
             assert transactions[0].direction == TransactionDirection.INCOME
             assert transactions[0].amount == Decimal("500.00")
         finally:

@@ -139,7 +139,7 @@ async def update_transaction(
     try:
         tid = uuid.UUID(transaction_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="无效的交易ID")
+        raise HTTPException(status_code=400, detail="无效的交易ID") from None
 
     result = await db.execute(
         select(TransactionRecord).where(

@@ -72,7 +72,7 @@ async def save_transactions(
     except Exception as e:
         # 批量插入失败，必须先 rollback 再重试
         await db.rollback()
-        errors.append(f"批量插入失败: {str(e)}")
+        errors.append(f"批量插入失败: {e!s}")
         success_count = 0
         duplicate_count = 0
         failed_count = 0
@@ -93,7 +93,7 @@ async def save_transactions(
             except Exception as row_e:
                 # savepoint 已自动回滚，无需手动 rollback
                 failed_count += 1
-                errors.append(f"行 {i}: {str(row_e)}")
+                errors.append(f"行 {i}: {row_e!s}")
 
     # 记录上传日志（在同一事务中提交，保证原子性）
     # transactions 非空已在函数开头检查

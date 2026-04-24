@@ -1,7 +1,7 @@
 """微信解析器 - 支持 CSV 和 XLSX"""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import ClassVar, Dict, List, Optional, Tuple
 
 from ..schemas.transaction import Transaction, TransactionDirection, TransactionSource
 from .base import BaseParser, read_file_with_header
@@ -12,7 +12,7 @@ class WechatParser(BaseParser):
     """微信账单解析器"""
 
     # 微信特有的列名（用于识别）
-    IDENTIFIER_COLUMNS = [
+    IDENTIFIER_COLUMNS: ClassVar[List[str]] = [
         "交易单号",  # 微信使用"交易单号"
         "商户单号",
         "当前状态",
@@ -30,10 +30,10 @@ class WechatParser(BaseParser):
         value = value.strip()
         if value == "收入":
             return TransactionDirection.INCOME
-        elif value == "支出":
+        if value == "支出":
             return TransactionDirection.EXPENSE
-        else:  # "/" 或其他表示中性交易
-            return TransactionDirection.NEUTRAL
+        # "/" 或其他表示中性交易
+        return TransactionDirection.NEUTRAL
 
 
 def parse_wechat(

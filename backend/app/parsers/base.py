@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -32,26 +32,22 @@ class ColumnMapping:
 class BaseParser(ABC):
     """解析器基类"""
 
-    # 用于识别该平台的关键列名（任一匹配即可）
-    IDENTIFIER_COLUMNS: List[str] = []
+    # 用于识别该平台的关键列名（任一匹配即可）- 子类必须 override
+    IDENTIFIER_COLUMNS: ClassVar[List[str]] = []
 
-    # 可能的列名映射（支持多种格式）
-    COLUMN_ALIASES: Dict[str, List[str]] = {}
-
-    # 来源
-    SOURCE: TransactionSource = TransactionSource.MANUAL
+    # 来源 - 子类必须 override
+    SOURCE: ClassVar[TransactionSource] = TransactionSource.MANUAL
 
     def __init__(self):
+        # 列名别名映射（实例变量，由子类 __init__ 填充）
+        self.COLUMN_ALIASES: Dict[str, List[str]] = {}
         self.column_mapping: Optional[ColumnMapping] = None
 
     @classmethod
     def can_parse(cls, columns: List[str]) -> bool:
         """检查是否能解析此文件"""
         columns_lower = [c.lower().strip() for c in columns]
-        for identifier in cls.IDENTIFIER_COLUMNS:
-            if identifier.lower() in columns_lower:
-                return True
-        return False
+        return any(identifier.lower() in columns_lower for identifier in cls.IDENTIFIER_COLUMNS)
 
     def find_column(self, columns: List[str], aliases: List[str]) -> Optional[str]:
         """根据别名列表查找列名"""
@@ -99,7 +95,7 @@ class BaseParser(ABC):
         except (InvalidOperation, ValueError):
             return Decimal("0")
 
-    # 北京时区 (UTC+8)
+    # 北京时区 (UTC+8)  # noqa: ERA001
     _BEIJING_TZ = timezone(timedelta(hours=8))
 
     def parse_datetime(self, value: Any) -> datetime:
@@ -192,7 +188,7 @@ class BaseParser(ABC):
                 stats["success"] += 1
             except Exception as e:
                 stats["failed"] += 1
-                stats["errors"].append(f"行 {idx}: {str(e)}")
+                stats["errors"].append(f"行 {idx}: {e!s}")
 
         return transactions, stats
 
@@ -202,7 +198,7 @@ def detect_encoding(file_path: Path) -> str:
     encodings = ["utf-8", "gbk", "gb2312", "gb18030", "utf-16", "latin-1"]
     for encoding in encodings:
         try:
-            with open(file_path, "r", encoding=encoding) as f:
+            with file_path.open(encoding=encoding) as f:
                 content = f.read(5000)
                 # 检查是否有明显的中文字符
                 if any("\u4e00" <= c <= "\u9fff" for c in content):
@@ -230,7 +226,7 @@ def detect_header_row(file_path: Path, max_rows: int = 50) -> int:
         encoding = detect_encoding(file_path)
         try:
             # 先尝试读取原始内容来检测表头
-            with open(file_path, "r", encoding=encoding) as f:
+            with file_path.open(encoding=encoding) as f:
                 lines = [f.readline() for _ in range(max_rows)]
 
             # 查找包含关键列名的行
@@ -243,7 +239,7 @@ def detect_header_row(file_path: Path, max_rows: int = 50) -> int:
 
             raise ValueError("无法检测到表头行")
         except Exception as e:
-            raise ValueError(f"无法读取文件: {e}")
+            raise ValueError(f"无法读取文件: {e}") from e
 
     # XLSX 文件的表头检测
     for row_idx in range(len(df)):

@@ -60,15 +60,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 def decode_token(token: str) -> Optional[dict]:
     """解析 JWT token"""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        return payload
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except JWTError:
         return None
 
@@ -98,7 +96,7 @@ async def get_current_user(
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise credentials_exception
+        raise credentials_exception from None
 
     result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()
