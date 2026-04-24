@@ -1,17 +1,18 @@
 """上传 API"""
+
 import logging
 import tempfile
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..parsers.parser import parse_file, detect_source
 from ..core.database import get_db
 from ..core.security import get_current_user
 from ..db.models import User
+from ..parsers.parser import detect_source, parse_file
 from ..services.transaction import save_transactions
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ MAX_FILE_SIZE = 20 * 1024 * 1024
 
 class UploadResponse(BaseModel):
     """上传响应"""
+
     success: bool
     message: str
     stats: dict
@@ -31,6 +33,7 @@ class UploadResponse(BaseModel):
 
 class SaveResponse(BaseModel):
     """保存响应"""
+
     success: bool
     message: str
     saved: int
@@ -45,16 +48,14 @@ async def validate_upload_file(file: UploadFile) -> bytes:
 
     if suffix not in [".csv", ".xlsx"]:
         raise HTTPException(
-            status_code=400,
-            detail=f"不支持的文件类型: {suffix}，仅支持 .csv 和 .xlsx"
+            status_code=400, detail=f"不支持的文件类型: {suffix}，仅支持 .csv 和 .xlsx"
         )
 
     # 读取并检查大小
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
-            status_code=400,
-            detail=f"文件过大，最大支持 {MAX_FILE_SIZE // 1024 // 1024}MB"
+            status_code=400, detail=f"文件过大，最大支持 {MAX_FILE_SIZE // 1024 // 1024}MB"
         )
 
     return content
@@ -133,7 +134,9 @@ async def upload_and_save(
         saved, duplicates, failed = await save_transactions(
             db, current_user.id, transactions, filename
         )
-        logger.info(f"导入成功: user={current_user.id}, 新增={saved}, 重复={duplicates}, 失败={failed}")
+        logger.info(
+            f"导入成功: user={current_user.id}, 新增={saved}, 重复={duplicates}, 失败={failed}"
+        )
 
         return SaveResponse(
             success=True,

@@ -1,6 +1,8 @@
 """Pytest 配置"""
-import pytest
+
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -22,6 +24,10 @@ def alipay_csv_content():
 def wechat_csv_content():
     """模拟微信 CSV 内容"""
     header_lines = "\n" * 17  # 跳过 17 行
-    header = "交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注"
-    data = "2026-04-01 12:00:00,商户消费,测试商家,测试商品,支出,50.00,零钱,支付成功,WX202604010001,,"
+    header = (
+        "交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注"
+    )
+    data = (
+        "2026-04-01 12:00:00,商户消费,测试商家,测试商品,支出,50.00,零钱,支付成功,WX202604010001,,"
+    )
     return header_lines + header + "\n" + data

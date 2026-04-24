@@ -1,18 +1,19 @@
 """交易 API"""
-from datetime import datetime
-from typing import Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from datetime import datetime
+from typing import List, Optional
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.database import get_db
 from ..core.security import get_current_user
-from ..db.models import User, TransactionRecord
+from ..db.models import TransactionRecord, User
 from ..services.transaction import (
-    get_user_transactions,
-    get_transaction_stats,
     count_user_transactions,
+    get_transaction_stats,
+    get_user_transactions,
 )
 
 router = APIRouter()
@@ -118,6 +119,7 @@ async def get_stats(
 
 class UpdateTransactionRequest(BaseModel):
     """更新交易请求"""
+
     note: Optional[str] = None
     is_hidden: Optional[bool] = None
 
@@ -130,8 +132,9 @@ async def update_transaction(
     db: AsyncSession = Depends(get_db),
 ):
     """更新交易记录"""
-    from sqlalchemy import select
     import uuid
+
+    from sqlalchemy import select
 
     try:
         tid = uuid.UUID(transaction_id)

@@ -1,12 +1,12 @@
 """安全模块测试"""
-import pytest
+
 from datetime import timedelta
 
 from app.core.security import (
-    verify_password,
-    get_password_hash,
     create_access_token,
     decode_token,
+    get_password_hash,
+    verify_password,
 )
 
 

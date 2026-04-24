@@ -1,12 +1,13 @@
 """交易服务"""
+
 import json
 import uuid
-from typing import List, Tuple, Optional
 from datetime import datetime, timedelta
+from typing import List, Optional, Tuple
 
-from sqlalchemy import select, func, case
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import case, func, select
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.models import TransactionRecord, UploadLog
 from ..schemas.transaction import Transaction
@@ -37,28 +38,28 @@ async def save_transactions(
         if t.source.value == "manual" and not source_order_id:
             source_order_id = str(uuid.uuid4())
 
-        values.append({
-            "user_id": user_id,
-            "source": t.source.value,
-            "source_order_id": source_order_id,
-            "transaction_time": t.transaction_time,
-            "amount": t.amount,
-            "direction": t.direction.value,
-            "counterparty": t.counterparty,
-            "description": t.description,
-            "source_category": t.source_category,
-            "payment_method": t.payment_method,
-            "status": t.status,
-            "merchant_order_id": t.merchant_order_id,
-            "note": t.note,
-        })
+        values.append(
+            {
+                "user_id": user_id,
+                "source": t.source.value,
+                "source_order_id": source_order_id,
+                "transaction_time": t.transaction_time,
+                "amount": t.amount,
+                "direction": t.direction.value,
+                "counterparty": t.counterparty,
+                "description": t.description,
+                "source_category": t.source_category,
+                "payment_method": t.payment_method,
+                "status": t.status,
+                "merchant_order_id": t.merchant_order_id,
+                "note": t.note,
+            }
+        )
 
     try:
         # 批量插入，冲突时跳过
         stmt = insert(TransactionRecord).values(values)
-        stmt = stmt.on_conflict_do_nothing(
-            index_elements=["user_id", "source", "source_order_id"]
-        )
+        stmt = stmt.on_conflict_do_nothing(index_elements=["user_id", "source", "source_order_id"])
         # 返回插入的行数
         stmt = stmt.returning(TransactionRecord.id)
 

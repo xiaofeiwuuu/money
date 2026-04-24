@@ -1,11 +1,11 @@
 """解析器基类和工具函数"""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
-from decimal import Decimal
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict, Any
-import re
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -15,6 +15,7 @@ from ..schemas.transaction import Transaction, TransactionDirection, Transaction
 @dataclass
 class ColumnMapping:
     """列映射配置"""
+
     transaction_time: str
     amount: str
     direction: str
@@ -62,6 +63,7 @@ class BaseParser(ABC):
 
     def build_column_mapping(self, columns: List[str]) -> ColumnMapping:
         """构建列映射"""
+
         def get_col(key: str) -> Optional[str]:
             aliases = self.COLUMN_ALIASES.get(key, [key])
             return self.find_column(columns, aliases)
@@ -94,7 +96,7 @@ class BaseParser(ABC):
         s = s.lstrip("+-")
         try:
             return Decimal(s) if s else Decimal("0")
-        except:
+        except (InvalidOperation, ValueError):
             return Decimal("0")
 
     # 北京时区 (UTC+8)
@@ -143,7 +145,9 @@ class BaseParser(ABC):
         for field in required:
             col = getattr(mapping, field)
             if not col or col not in df.columns:
-                raise ValueError(f"缺少必需列: {field} (尝试匹配: {self.COLUMN_ALIASES.get(field, [field])})")
+                raise ValueError(
+                    f"缺少必需列: {field} (尝试匹配: {self.COLUMN_ALIASES.get(field, [field])})"
+                )
 
         # 预计算列名到 tuple 索引的映射（+1 因为 index 在位置 0）
         col_idx = {col: i + 1 for i, col in enumerate(df.columns)}
@@ -179,7 +183,9 @@ class BaseParser(ABC):
                     source_category=self.safe_str(row[cat_idx]),
                     payment_method=self.safe_str(row[payment_idx]) if payment_idx else "",
                     status=self.safe_str(row[status_idx]) if status_idx else "",
-                    merchant_order_id=self.safe_str(row[merchant_idx]) or None if merchant_idx else None,
+                    merchant_order_id=self.safe_str(row[merchant_idx]) or None
+                    if merchant_idx
+                    else None,
                     note=self.safe_str(row[note_idx]) or None if note_idx else None,
                 )
                 transactions.append(transaction)
@@ -241,7 +247,9 @@ def detect_header_row(file_path: Path, max_rows: int = 50) -> int:
 
     # XLSX 文件的表头检测
     for row_idx in range(len(df)):
-        row_values = [str(v).strip().replace("\t", "") for v in df.iloc[row_idx].values if pd.notna(v)]
+        row_values = [
+            str(v).strip().replace("\t", "") for v in df.iloc[row_idx].values if pd.notna(v)
+        ]
         matches = sum(1 for key in key_columns if any(key in v for v in row_values))
         if matches >= 2:
             return row_idx
@@ -276,6 +284,8 @@ def read_file_with_header(file_path: Path, header_row: Optional[int] = None) -> 
     # 清理数据（去除制表符）
     for col in df.columns:
         if df[col].dtype == object:
-            df[col] = df[col].apply(lambda x: str(x).strip().replace("\t", "") if pd.notna(x) else x)
+            df[col] = df[col].apply(
+                lambda x: str(x).strip().replace("\t", "") if pd.notna(x) else x
+            )
 
     return df

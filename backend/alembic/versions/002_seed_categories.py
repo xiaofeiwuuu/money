@@ -5,15 +5,17 @@ Revises: 001_initial
 Create Date: 2026-04-24
 
 """
-from typing import Sequence, Union
-import uuid
 
-from alembic import op
+import uuid
+from typing import Sequence, Union
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision: str = '002_seed_categories'
-down_revision: Union[str, None] = '001_initial'
+from alembic import op
+
+revision: str = "002_seed_categories"
+down_revision: Union[str, None] = "001_initial"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -62,23 +64,27 @@ def upgrade() -> None:
     # 准备数据
     rows = []
     for name, icon, color in EXPENSE_CATEGORIES:
-        rows.append({
-            "id": str(uuid.uuid4()),
-            "name": name,
-            "icon": icon,
-            "color": color,
-            "direction": "expense",
-            "is_system": True,
-        })
+        rows.append(
+            {
+                "id": str(uuid.uuid4()),
+                "name": name,
+                "icon": icon,
+                "color": color,
+                "direction": "expense",
+                "is_system": True,
+            }
+        )
     for name, icon, color in INCOME_CATEGORIES:
-        rows.append({
-            "id": str(uuid.uuid4()),
-            "name": name,
-            "icon": icon,
-            "color": color,
-            "direction": "income",
-            "is_system": True,
-        })
+        rows.append(
+            {
+                "id": str(uuid.uuid4()),
+                "name": name,
+                "icon": icon,
+                "color": color,
+                "direction": "income",
+                "is_system": True,
+            }
+        )
 
     op.bulk_insert(categories_table, rows)
 

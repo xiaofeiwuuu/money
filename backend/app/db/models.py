@@ -1,16 +1,16 @@
 """SQLAlchemy 数据库模型"""
-from datetime import datetime, timezone
-from decimal import Decimal
-from typing import Optional, List
-import uuid
+
 import enum
 import secrets
+import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
+from typing import List, Optional
 
-from sqlalchemy import (
-    String, Text, Numeric, DateTime, Boolean, ForeignKey, Index, Enum as SQLEnum
-)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Numeric, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..core.database import Base
 
@@ -50,7 +50,9 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)  # 管理员标识
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
 
     # 关系
     transactions: Mapped[List["TransactionRecord"]] = relationship(back_populates="user")
@@ -65,7 +67,9 @@ class Family(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    invite_code: Mapped[str] = mapped_column(String(20), unique=True, index=True, default=generate_invite_code)
+    invite_code: Mapped[str] = mapped_column(
+        String(20), unique=True, index=True, default=generate_invite_code
+    )
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
@@ -86,9 +90,7 @@ class FamilyMember(Base):
     family: Mapped["Family"] = relationship(back_populates="members")
     user: Mapped["User"] = relationship(back_populates="family_memberships")
 
-    __table_args__ = (
-        Index("ix_family_members_family_user", "family_id", "user_id", unique=True),
-    )
+    __table_args__ = (Index("ix_family_members_family_user", "family_id", "user_id", unique=True),)
 
 
 # 分类模型
@@ -102,9 +104,13 @@ class Category(Base):
     direction: Mapped[TransactionDirectionEnum] = mapped_column(
         SQLEnum(TransactionDirectionEnum, name="transaction_direction", create_type=False)
     )
-    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
+    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True
+    )
     is_system: Mapped[bool] = mapped_column(Boolean, default=False)  # 系统预设分类
-    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)  # 用户自定义分类
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )  # 用户自定义分类
 
     # 关系
     transactions: Mapped[List["TransactionRecord"]] = relationship(back_populates="category")
@@ -115,7 +121,9 @@ class TransactionRecord(Base):
     __tablename__ = "transactions"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), index=True
+    )
 
     # 来源信息（用于去重）
     source: Mapped[TransactionSourceEnum] = mapped_column(
@@ -134,7 +142,9 @@ class TransactionRecord(Base):
 
     # 分类
     source_category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # 原始分类
-    category_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)  # 系统分类
+    category_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True
+    )  # 系统分类
 
     # 支付信息
     payment_method: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -148,7 +158,9 @@ class TransactionRecord(Base):
 
     # 元数据
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
 
     # 关系
     user: Mapped["User"] = relationship(back_populates="transactions")
@@ -174,11 +186,11 @@ class ParserConfig(Base):
     column_aliases: Mapped[str] = mapped_column(Text)  # JSON 数组: ["交易时间", "时间"]
     is_required: Mapped[bool] = mapped_column(Boolean, default=False)
     description: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
-
-    __table_args__ = (
-        Index("ix_parser_config_source_field", "source", "field_name", unique=True),
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
     )
+
+    __table_args__ = (Index("ix_parser_config_source_field", "source", "field_name", unique=True),)
 
 
 # 上传日志
@@ -186,7 +198,9 @@ class UploadLog(Base):
     __tablename__ = "upload_logs"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), index=True
+    )
     filename: Mapped[str] = mapped_column(String(255))
     source: Mapped[TransactionSourceEnum] = mapped_column(
         SQLEnum(TransactionSourceEnum, name="transaction_source", create_type=False)

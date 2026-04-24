@@ -1,8 +1,10 @@
 """应用配置"""
+
 import logging
-from pydantic_settings import BaseSettings
-from pydantic import model_validator
 from functools import lru_cache
+
+from pydantic import model_validator
+from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +14,7 @@ _DEV_SECRET_KEY = "dev-only-secret-key-do-not-use-in-production-12345"
 
 class Settings(BaseSettings):
     """应用设置"""
+
     # 数据库
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/money"
 

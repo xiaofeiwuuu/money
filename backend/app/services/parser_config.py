@@ -1,4 +1,5 @@
 """解析器配置服务 - 数据库操作"""
+
 import json
 from typing import Dict, List, Optional
 
@@ -7,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.models import ParserConfig
 from ..parsers.config import (
-    get_default_aliases,
-    get_cached_aliases,
-    update_cache,
     clear_cache,
+    get_cached_aliases,
+    get_default_aliases,
+    update_cache,
 )
 
 # 重新导出以保持兼容
@@ -32,9 +33,7 @@ async def load_parser_config(db: AsyncSession, source: str) -> Dict[str, List[st
     aliases = get_default_aliases(source)
 
     # 用数据库配置覆盖
-    result = await db.execute(
-        select(ParserConfig).where(ParserConfig.source == source)
-    )
+    result = await db.execute(select(ParserConfig).where(ParserConfig.source == source))
     configs = result.scalars().all()
 
     for config in configs:

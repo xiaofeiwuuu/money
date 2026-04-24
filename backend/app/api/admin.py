@@ -1,4 +1,5 @@
 """管理 API"""
+
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,14 +7,14 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.database import get_db
-from ..core.security import get_current_user, get_current_admin
+from ..core.security import get_current_admin, get_current_user
 from ..db.models import User
 from ..services.parser_config import (
-    get_all_configs,
-    update_config,
     add_alias,
+    get_all_configs,
     load_parser_config,
     update_cache,
+    update_config,
 )
 
 router = APIRouter()

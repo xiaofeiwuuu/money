@@ -1,4 +1,5 @@
 """统一交易数据模型（解析后、入库前）"""
+
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -12,6 +13,7 @@ from ..db.models import TransactionSourceEnum as TransactionSource
 @dataclass
 class Transaction:
     """统一交易记录"""
+
     source: TransactionSource
     source_order_id: str  # 原始订单号，用于去重
     transaction_time: datetime

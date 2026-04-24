@@ -1,4 +1,5 @@
 """Alembic 环境配置"""
+
 import asyncio
 from logging.config import fileConfig
 
@@ -13,7 +14,6 @@ from app.core.config import get_settings
 
 # 导入所有模型
 from app.core.database import Base
-from app.db.models import User, Family, FamilyMember, Category, TransactionRecord, UploadLog, ParserConfig
 
 config = context.config
 

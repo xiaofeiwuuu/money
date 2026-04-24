@@ -1,20 +1,21 @@
 """认证 API"""
+
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.config import get_settings
 from ..core.database import get_db
 from ..core.security import (
-    get_password_hash_async,
-    verify_password_async,
     create_access_token,
     get_current_user,
+    get_password_hash_async,
+    verify_password_async,
 )
-from ..core.config import get_settings
 from ..db.models import User
 
 router = APIRouter()
@@ -48,6 +49,7 @@ class UserResponse(BaseModel):
 
 class UpdateUserRequest(BaseModel):
     """更新用户请求"""
+
     nickname: Optional[str] = None
     avatar_url: Optional[str] = None
 

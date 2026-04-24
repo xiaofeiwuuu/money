@@ -1,13 +1,14 @@
 """FastAPI 主应用"""
+
 import logging
 import sys
 
-from fastapi import FastAPI, Depends
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .api import upload, auth, transactions, admin
+from .api import admin, auth, transactions, upload
 from .core.config import get_settings
 from .core.database import get_db
 

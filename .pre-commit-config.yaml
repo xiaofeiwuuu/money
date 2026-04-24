@@ -11,7 +11,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: \.pen$
       - id: end-of-file-fixer
+        exclude: \.pen$
       - id: check-yaml
       - id: check-added-large-files
         args: [--maxkb=1000]

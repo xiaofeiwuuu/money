@@ -1,12 +1,12 @@
 """统一解析器入口"""
+
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from ..schemas.transaction import Transaction
-from .base import read_file_with_header
 from .alipay import AlipayParser, parse_alipay
+from .base import read_file_with_header
 from .wechat import WechatParser, parse_wechat
-
 
 # 注册所有解析器
 PARSERS = [AlipayParser, WechatParser]
@@ -50,10 +50,7 @@ def detect_source(file_path: Path) -> str:
     raise ValueError(f"无法识别文件来源: {file_path.name}")
 
 
-def parse_file(
-    file_path: Path,
-    source: Optional[str] = None
-) -> Tuple[List[Transaction], dict]:
+def parse_file(file_path: Path, source: Optional[str] = None) -> Tuple[List[Transaction], dict]:
     """
     解析账单文件
 

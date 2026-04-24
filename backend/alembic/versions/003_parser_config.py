@@ -5,16 +5,18 @@ Revises: 002_seed_categories
 Create Date: 2026-04-24
 
 """
-from typing import Sequence, Union
-import uuid
-import json
 
-from alembic import op
+import json
+import uuid
+from typing import Sequence, Union
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision: str = '003_parser_config'
-down_revision: Union[str, None] = '002_seed_categories'
+from alembic import op
+
+revision: str = "003_parser_config"
+down_revision: Union[str, None] = "002_seed_categories"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -51,16 +53,18 @@ WECHAT_FIELDS = [
 def upgrade() -> None:
     # 创建表
     op.create_table(
-        'parser_configs',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('source', sa.String(20), nullable=False),
-        sa.Column('field_name', sa.String(50), nullable=False),
-        sa.Column('column_aliases', sa.Text(), nullable=False),
-        sa.Column('is_required', sa.Boolean(), default=False),
-        sa.Column('description', sa.String(200), nullable=True),
-        sa.Column('updated_at', sa.DateTime(), nullable=False),
+        "parser_configs",
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("source", sa.String(20), nullable=False),
+        sa.Column("field_name", sa.String(50), nullable=False),
+        sa.Column("column_aliases", sa.Text(), nullable=False),
+        sa.Column("is_required", sa.Boolean(), default=False),
+        sa.Column("description", sa.String(200), nullable=True),
+        sa.Column("updated_at", sa.DateTime(), nullable=False),
     )
-    op.create_index('ix_parser_config_source_field', 'parser_configs', ['source', 'field_name'], unique=True)
+    op.create_index(
+        "ix_parser_config_source_field", "parser_configs", ["source", "field_name"], unique=True
+    )
 
     # 使用 bulk_insert 避免 SQL 注入风险
     from datetime import datetime
@@ -80,29 +84,33 @@ def upgrade() -> None:
     now = datetime.utcnow()
 
     for field_name, aliases, is_required, desc in ALIPAY_FIELDS:
-        rows.append({
-            "id": str(uuid.uuid4()),
-            "source": "alipay",
-            "field_name": field_name,
-            "column_aliases": json.dumps(aliases, ensure_ascii=False),
-            "is_required": is_required,
-            "description": desc,
-            "updated_at": now,
-        })
+        rows.append(
+            {
+                "id": str(uuid.uuid4()),
+                "source": "alipay",
+                "field_name": field_name,
+                "column_aliases": json.dumps(aliases, ensure_ascii=False),
+                "is_required": is_required,
+                "description": desc,
+                "updated_at": now,
+            }
+        )
 
     for field_name, aliases, is_required, desc in WECHAT_FIELDS:
-        rows.append({
-            "id": str(uuid.uuid4()),
-            "source": "wechat",
-            "field_name": field_name,
-            "column_aliases": json.dumps(aliases, ensure_ascii=False),
-            "is_required": is_required,
-            "description": desc,
-            "updated_at": now,
-        })
+        rows.append(
+            {
+                "id": str(uuid.uuid4()),
+                "source": "wechat",
+                "field_name": field_name,
+                "column_aliases": json.dumps(aliases, ensure_ascii=False),
+                "is_required": is_required,
+                "description": desc,
+                "updated_at": now,
+            }
+        )
 
     op.bulk_insert(parser_configs_table, rows)
 
 
 def downgrade() -> None:
-    op.drop_table('parser_configs')
+    op.drop_table("parser_configs")

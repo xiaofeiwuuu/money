@@ -1,4 +1,5 @@
 """解析器配置 - 轻量级模块，无数据库依赖"""
+
 from typing import Dict, List
 
 # 默认配置（硬编码回退）

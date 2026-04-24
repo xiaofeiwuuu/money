@@ -1,10 +1,11 @@
 """支付宝解析器 - 支持 CSV 和 XLSX"""
+
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from ..schemas.transaction import Transaction, TransactionDirection, TransactionSource
-from .config import get_cached_aliases
 from .base import BaseParser, read_file_with_header
+from .config import get_cached_aliases
 
 
 class AlipayParser(BaseParser):
@@ -61,10 +62,11 @@ def parse_alipay_csv(file_path: Path) -> Tuple[List[Transaction], dict]:
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) > 1:
         file_path = Path(sys.argv[1])
         transactions, stats = parse_alipay(file_path)
         print(f"统计: {stats}")
-        print(f"\n前 5 条记录:")
+        print("\n前 5 条记录:")
         for t in transactions[:5]:
             print(f"  {t.transaction_time} | {t.direction.value} | {t.amount} | {t.counterparty}")
