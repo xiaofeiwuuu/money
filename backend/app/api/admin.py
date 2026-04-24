@@ -1,5 +1,6 @@
 """管理 API"""
 
+import logging
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -17,6 +18,7 @@ from ..services.parser_config import (
     update_config,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -81,6 +83,9 @@ async def update_parser_config(
     aliases = await load_parser_config(db, request.source)
     update_cache(request.source, aliases)
 
+    logger.info(
+        f"配置更新: admin={current_user.id}, source={request.source}, field={request.field_name}"
+    )
     return {"success": True, "message": "配置已更新"}
 
 
@@ -109,6 +114,9 @@ async def add_column_alias(
     aliases = await load_parser_config(db, request.source)
     update_cache(request.source, aliases)
 
+    logger.info(
+        f"别名添加: admin={current_user.id}, source={request.source}, field={request.field_name}, alias={request.new_alias}"
+    )
     return {"success": True, "message": f"已添加别名: {request.new_alias}"}
 
 
@@ -126,4 +134,5 @@ async def reload_parser_configs(
         aliases = await load_parser_config(db, source)
         update_cache(source, aliases)
 
+    logger.info(f"配置重载: admin={current_user.id}")
     return {"success": True, "message": "配置已重新加载"}

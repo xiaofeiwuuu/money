@@ -41,7 +41,6 @@ class BaseParser(ABC):
     def __init__(self):
         # 列名别名映射（实例变量，由子类 __init__ 填充）
         self.COLUMN_ALIASES: Dict[str, List[str]] = {}
-        self.column_mapping: Optional[ColumnMapping] = None
 
     @classmethod
     def can_parse(cls, columns: List[str]) -> bool:

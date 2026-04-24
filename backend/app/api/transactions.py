@@ -1,10 +1,13 @@
 """交易 API"""
 
+import logging
+import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.database import get_db
@@ -16,16 +19,17 @@ from ..services.transaction import (
     get_user_transactions,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 class TransactionResponse(BaseModel):
     id: str
-    source: str
+    source: Literal["alipay", "wechat", "manual"]
     source_order_id: str
     transaction_time: datetime
     amount: str  # Decimal 字符串，避免精度丢失
-    direction: str
+    direction: Literal["income", "expense", "transfer"]
     counterparty: str
     description: Optional[str]
     source_category: Optional[str]
@@ -132,10 +136,6 @@ async def update_transaction(
     db: AsyncSession = Depends(get_db),
 ):
     """更新交易记录"""
-    import uuid
-
-    from sqlalchemy import select
-
     try:
         tid = uuid.UUID(transaction_id)
     except ValueError:
@@ -158,4 +158,5 @@ async def update_transaction(
         transaction.is_hidden = request.is_hidden
 
     await db.commit()
+    logger.info(f"交易更新: user={current_user.id}, transaction={tid}")
     return {"success": True}

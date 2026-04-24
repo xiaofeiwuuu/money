@@ -1,5 +1,6 @@
 """认证 API"""
 
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
@@ -18,6 +19,7 @@ from ..core.security import (
 )
 from ..db.models import User
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 settings = get_settings()
 
@@ -71,8 +73,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
         await db.commit()
         await db.refresh(user)
+        logger.info(f"用户注册成功: user_id={user.id}")
     except IntegrityError:
         await db.rollback()
+        logger.warning("注册失败: 邮箱已存在")
         raise HTTPException(status_code=400, detail="邮箱已被注册") from None
 
     # 生成 token
@@ -86,7 +90,9 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user_data.email))
     user = result.scalar_one_or_none()
 
+    # 统一日志消息，防止账号枚举攻击
     if not user:
+        logger.warning("登录失败: 凭证无效")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="邮箱或密码错误",
@@ -94,14 +100,17 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # 异步验证密码（避免阻塞事件循环）
     if not await verify_password_async(user_data.password, user.hashed_password):
+        logger.warning("登录失败: 凭证无效")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="邮箱或密码错误",
         )
 
     if not user.is_active:
+        logger.warning("登录失败: 账户已禁用")
         raise HTTPException(status_code=400, detail="用户已被禁用")
 
+    logger.info(f"用户登录成功: user_id={user.id}")
     access_token = create_access_token(data={"sub": str(user.id)})
     return Token(access_token=access_token)
 

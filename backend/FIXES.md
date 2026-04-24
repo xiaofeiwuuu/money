@@ -52,3 +52,20 @@
 - [x] N8: 未使用导入 get_default_aliases - 已删除
 - [x] N11: upload.py source fallback 死代码 - 已简化
 - [x] N16: 文件名进日志隐私问题 - 改为只记 user_id
+
+## 第四轮修复 (Review 综合审查)
+
+- [x] P2: BaseParser.column_mapping 死字段删除
+- [x] P2: auth/transactions/admin 添加 logger + 关键操作日志
+- [x] P2: 删除顶层废弃 test_parser.py
+- [x] P1: 添加 GitHub Actions CI (.github/workflows/ci.yml)
+- [x] P0: 时区测试 (test_timezone.py) - 9 个测试用例覆盖时区边界
+- [x] P1: logger 位置移到所有 import 之后（auth/transactions/admin）
+- [x] P2: transactions/admin 添加实际 logger 调用
+- [x] P3: 登录失败日志统一消息，防止账号枚举
+- [x] C1-C3: CI 改进 - Python matrix + PostgreSQL service + alembic migrate
+
+## 第五轮修复 (低优先级收尾)
+
+- [x] L1: preview_upload 添加日志记录
+- [x] L2: TransactionResponse 使用 Literal 类型提升 OpenAPI 文档

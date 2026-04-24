@@ -176,6 +176,7 @@ async def preview_upload(
     try:
         source = detect_source(Path(filename))
         transactions, stats = parse_file(tmp_path, source=source)
+        logger.info(f"预览成功: user={current_user.id}, source={source}, total={stats['total']}")
 
         return {
             "source": source,
@@ -184,6 +185,7 @@ async def preview_upload(
         }
 
     except Exception as e:
+        logger.exception("预览失败")
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     finally:
