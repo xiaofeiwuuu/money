@@ -1,0 +1,56 @@
+# ========== 隐私/敏感数据（必须排除）==========
+# 环境变量
+.env
+**/.env
+*.env.local
+
+# 真实账单文件（包含个人隐私）
+支付宝交易明细*
+微信支付账单*
+*_utf8.csv
+alipay_*.csv
+alipay_*.xlsx
+wechat_*.csv
+wechat_*.xlsx
+
+# ========== Python ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境
+venv/
+env/
+.venv/
+**/venv/
+**/env/
+**/.venv/
+
+# 测试/构建产物
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# ========== IDE ==========
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ========== 日志/临时 ==========
+*.log
+*.tmp
+*.temp
+
+# ========== Node (为 frontend 预留) ==========
+node_modules/
+.next/
+.turbo/

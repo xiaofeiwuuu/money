@@ -1,0 +1,39 @@
+# pre-commit 配置：提交前自动检查代码质量
+# 仅作用于 backend/ 下的 Python 代码
+# 运行：pre-commit run --all-files
+# 更新：pre-commit autoupdate
+
+default_stages: [pre-commit]
+
+repos:
+  # ---- 通用检查 ----
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+
+  # ---- Python: ruff (linter + formatter) ----
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^backend/.*\.py$
+      - id: ruff-format
+        files: ^backend/.*\.py$
+
+  # ---- Python: bandit (安全扫描) ----
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: [-q, -ll]  # 只报 medium+ 严重度
+        files: ^backend/app/.*\.py$
+        exclude: ^backend/tests/
