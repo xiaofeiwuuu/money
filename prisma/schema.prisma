@@ -1,0 +1,45 @@
+// V0 schema: 单用户、无家庭、无认证
+// 后续 V1 会加上 User/Family/Member
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 交易记录
+model Transaction {
+  id              String   @id @default(cuid())
+  source          String   // "alipay" | "wechat"
+  orderId         String   // 来源订单号（用于去重）
+  transactionDate DateTime // 交易时间（带时区）
+  amount          Decimal  @db.Decimal(12, 2)
+  direction       String   // "income" | "expense"
+  merchant        String?  // 商家
+  description     String?  // 备注
+  rawData         Json?    // 原始行数据（备查）
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([source, orderId])
+  @@index([transactionDate])
+  @@index([source])
+}
+
+// 导入会话（记录每次导入）
+model ImportSession {
+  id           String   @id @default(cuid())
+  source       String   // "alipay" | "wechat"
+  filename     String
+  totalRows    Int
+  insertedRows Int
+  skippedRows  Int      // 已存在跳过的
+  failedRows   Int      // 解析失败的
+  errorDetails Json?    // 失败行详情
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}

@@ -1,56 +1,55 @@
-# ========== 隐私/敏感数据（必须排除）==========
-# 环境变量
-.env
-**/.env
-*.env.local
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# 真实账单文件（包含个人隐私）
-支付宝交易明细*
-微信支付账单*
-*_utf8.csv
-alipay_*.csv
-alipay_*.xlsx
-wechat_*.csv
-wechat_*.xlsx
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# ========== Python ==========
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+# testing
+/coverage
 
-# 虚拟环境
-venv/
-env/
-.venv/
-**/venv/
-**/env/
-**/.venv/
+# next.js
+/.next/
+/out/
 
-# 测试/构建产物
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-dist/
-build/
-*.egg-info/
+# production
+/build
 
-# ========== IDE ==========
-.idea/
-.vscode/
-*.swp
-*.swo
+# misc
 .DS_Store
+*.pem
 
-# ========== 日志/临时 ==========
-*.log
-*.tmp
-*.temp
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# ========== Node (为 frontend 预留) ==========
-node_modules/
-.next/
-.turbo/
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+/src/generated/prisma
+
+# pnpm 本地缓存
+.pnpm-store/
+
+# 个人账单数据（隐私）
+samples/
+
+# Claude / IDE 本地配置
+.claude/
+AGENTS.md
+CLAUDE.md
+
